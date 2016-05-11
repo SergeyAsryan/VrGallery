@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using SimpleJSON;
 
 public class DataLoader : MonoBehaviour {
 
@@ -7,6 +8,7 @@ public class DataLoader : MonoBehaviour {
     public string url = "http://stereo.nypl.org/gallery/popular/1.json";
     public GameObject lightPreFab;
     private int ballcount = 0;
+    private JSONNode json;
 
     // Use this for initialization
     IEnumerator Start()
@@ -14,6 +16,7 @@ public class DataLoader : MonoBehaviour {
         WWW www = new WWW(url);
         yield return www;
         Debug.Log(www.text);
+        json = JSON.Parse(www.text);
         InvokeRepeating("CreateLightBall", 0, 3.0f);
     }
 
@@ -26,7 +29,9 @@ public class DataLoader : MonoBehaviour {
     {
         ballcount++;
         string ballname = "test-" + ballcount;
-        
+        ballname = json[ballcount]["digitalid"].Value;
+
+
         Debug.Log("Making Light Ball:" + ballname);
         Transform cameraTransform = Camera.main.gameObject.transform;
         Vector3 ballVector = cameraTransform.position + new Vector3(1, 1, 6);
