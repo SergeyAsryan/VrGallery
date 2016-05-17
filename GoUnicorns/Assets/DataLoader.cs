@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using SimpleJSON;
+using System.Threading;
 
 public class DataLoader : MonoBehaviour {
 
@@ -13,43 +14,61 @@ public class DataLoader : MonoBehaviour {
     private AudioClip buyAudio;
     private AudioClip buyAudioAlt;
 
+    private WWW theInternet;
+
     // Use this for initialization
-    IEnumerator Start()
+    //IEnumerator Start()
+    //{
+    //    sellAudio = (AudioClip)Resources.Load("Sound/sell", typeof(AudioClip));
+    //    buyAudio = (AudioClip)Resources.Load("Sound/buy1", typeof(AudioClip));
+    //    buyAudioAlt = (AudioClip)Resources.Load("Sound/buy2", typeof(AudioClip));
+
+    //    WWW www = new WWW(url);
+    //    yield return www;
+    //    Debug.Log(www.text);
+    //    json = JSON.Parse(www.text);
+    //    Invoke("CreateLightBall", 1.0f);
+    //    Debug.Log("Count is: " + json.Count);
+    //}
+
+    private bool isFirst = false;
+    void Start()
     {
         sellAudio = (AudioClip)Resources.Load("Sound/sell", typeof(AudioClip));
         buyAudio = (AudioClip)Resources.Load("Sound/buy1", typeof(AudioClip));
         buyAudioAlt = (AudioClip)Resources.Load("Sound/buy2", typeof(AudioClip));
-
-        WWW www = new WWW(url);
-        yield return www;
-        Debug.Log(www.text);
-        json = JSON.Parse(www.text);
-        Invoke("CreateLightBall", 1.0f);
-        Debug.Log("Count is: " + json.Count);
+        isFirst = true;
+        theInternet = new WWW(url);
     }
 
-    IEnumerator ReloadData()
+    void ReloadData()
     {
-        WWW www = new WWW(url);
-        yield return www;
-        Debug.Log(www.text);
-        json = JSON.Parse(www.text);
+        Debug.Log(theInternet.text);
+        json = JSON.Parse(theInternet.text);
         Invoke("CreateLightBall", 1.0f);
         Debug.Log("Count is: " + json.Count);
-        ballcount = 0;
+        theInternet.Dispose();
+        theInternet = null;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (ballcount > 0){
-            if (ballcount == (json.Count -1))
+        if( theInternet != null)
+        {
+            if (theInternet.isDone)
             {
-                Debug.Log("Reloading...");
                 ReloadData();
             }
         }
 
+        if (ballcount > 0 && (ballcount == (json.Count - 1)))
+        {
+            ballcount = 0;
+            Debug.Log("Reloading...");
+            theInternet = new WWW(url);
+
+        }
     }
 
     void CreateLightBall()
